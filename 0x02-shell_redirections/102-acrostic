@@ -1,2 +1,2 @@
 #!/bin/bash
-cut -c 1 - < input.txt | paste -sd ""
+cut -c 1 | paste -sd ""
