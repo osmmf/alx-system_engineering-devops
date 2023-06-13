@@ -1,2 +1,4 @@
 #!/bin/bash
-printf "%o\n" $(($((5#(echo $WATER | tr water 01234))) + $((5#(echo $STIR | tr stir. 01234))) )) | tr 01234567 bestchol
+result=$(echo "ibase=water; $WATER + ibase=stir; $STIR" | bc -l | sed 's/^\./0./')
+result_bestchol=$(echo "obase=bestchol; $result" | bc -l | sed 's/^\./0./')
+echo "The sum of WATER and STIR is: $result_bestchol"
