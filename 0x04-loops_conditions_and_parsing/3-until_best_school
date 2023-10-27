@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# a Bash script that displays Best School 10 times.
-count=0
-until [ $count -eq 10 ]; do
-echo "Best School"
-((count++))
+# Displays "Best School" 10 times using a for loop.
+
+i=1
+until [ $i -gt 10 ]
+do
+    echo "Best School"
+    ((i++))
 done
