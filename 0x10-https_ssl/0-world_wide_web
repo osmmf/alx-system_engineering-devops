@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
+# print domains and subdomains
 
-# Function to display information about a subdomain
-display_info() {
-    local subdomain=$1
-    local domain=$2
+print_domain_subdomain () {
+    local subdomain=$2
+    local domain=$1
+    local dns_info
 
     # Retrieve DNS information using dig command
     dns_info=$(dig +short $subdomain.$domain)
 
     # Check if the DNS information is not empty
     if [ -n "$dns_info" ]; then
+        # Extract destination from DNS information
+        destination=$(echo "$dns_info" | awk '{print $1}')
+
         # Display the information with the record type 'A'
-        echo "The subdomain $subdomain is a A record and points to $dns_info"
+        echo "The subdomain $subdomain is a A record and points to $destination"
     else
         # Display a message if DNS information is not available
         echo "No DNS information available for the subdomain $subdomain"
@@ -22,7 +26,7 @@ display_info() {
 
 # Check if both domain and subdomain are provided as arguments
 if [ "$#" -eq 2 ]; then
-    display_info $2 $1
+    print_domain_subdomain "$1" "$2"
 
 # If only domain is provided, display information for specific subdomains
 elif [ "$#" -eq 1 ]; then
@@ -31,7 +35,7 @@ elif [ "$#" -eq 1 ]; then
 
     # Loop through the subdomains and display information
     for subdomain in "${subdomains[@]}"; do
-        display_info $subdomain $domain
+        print_domain_subdomain $domain $subdomain
     done
 
 # Display usage instructions if incorrect number of arguments are provided
