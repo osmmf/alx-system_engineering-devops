@@ -10,12 +10,8 @@ display_info() {
 
     # Check if the DNS information is not empty
     if [ -n "$dns_info" ]; then
-        # Extract record type and destination from DNS information
-        record_type=$(echo "$dns_info" | awk '{print $4}')
-        destination=$(echo "$dns_info" | awk '{print $1}')
-
-        # Display the information
-        echo "The subdomain $subdomain is a $record_type record and points to $destination"
+        # Display the information with the record type 'A'
+        echo "The subdomain $subdomain is a A record and points to $dns_info"
     else
         # Display a message if DNS information is not available
         echo "No DNS information available for the subdomain $subdomain"
