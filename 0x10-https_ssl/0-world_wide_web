@@ -1,19 +1,39 @@
 #!/usr/bin/env bash
-# Usage: ./1-world_wide_web <domain> <subdomain>
-# Display information about subdomains.
 
-domain_information () {
-    line=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | tr '\n' ' ')
-    echo "$2 $line" | awk '{print "The subdomain " $1 " is a " $2 " record and points to " $3}'
+# Function to display information about a subdomain
+display_info() {
+    local subdomain=$1
+    local domain=$2
+
+    # Retrieve DNS information using dig command
+    dns_info=$(dig +short $subdomain.$domain)
+
+    # Extract record type and destination from DNS information
+    record_type=$(echo "$dns_info" | awk '{print $4}')
+    destination=$(echo "$dns_info" | awk '{print $1}')
+
+    # Display the information
+    echo "The subdomain $subdomain is a $record_type record and points to $destination"
 }
 
-if [ "$#" == 1 ]
-then
-  domain_information "$1" "www"
-  domain_information "$1" "lb-01"
-  domain_information "$1" "web-01"
-  domain_information "$1" "web-02"
-elif [ "$#" == 2 ]
-then
-  domain_information "$1" "$2"
+# Main script
+
+# Check if both domain and subdomain are provided as arguments
+if [ "$#" -eq 2 ]; then
+    display_info $2 $1
+
+# If only domain is provided, display information for specific subdomains
+elif [ "$#" -eq 1 ]; then
+    domain=$1
+    subdomains=("www" "lb-01" "web-01" "web-02")
+
+    # Loop through the subdomains and display information
+    for subdomain in "${subdomains[@]}"; do
+        display_info $subdomain $domain
+    done
+
+# Display usage instructions if incorrect number of arguments are provided
+else
+    echo "Usage: $0 <domain> [subdomain]"
+    exit 1
 fi
