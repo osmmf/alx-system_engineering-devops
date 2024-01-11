@@ -1,45 +1,19 @@
 #!/usr/bin/env bash
-# print domains and subdomains
+# Usage: ./1-world_wide_web <domain> <subdomain>
+# Display information about subdomains.
 
-print_domain_subdomain () {
-    local subdomain=$2
-    local domain=$1
-    local dns_info
-
-    # Retrieve DNS information using dig command
-    dns_info=$(dig +short $subdomain.$domain)
-
-    # Check if the DNS information is not empty
-    if [ -n "$dns_info" ]; then
-        # Extract destination from DNS information
-        destination=$(echo "$dns_info" | awk '{print $1}')
-
-        # Display the information with the record type 'A'
-        echo "The subdomain $subdomain is a A record and points to $destination"
-    else
-        # Display a message if DNS information is not available
-        echo "No DNS information available for the subdomain $subdomain"
-    fi
+domain_information () {
+    line=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | tr '\n' ' ')
+    echo "$2 $line" | awk '{print "The subdomain " $1 " is a " $2 " record and points to " $3}'
 }
 
-# Main script
-
-# Check if both domain and subdomain are provided as arguments
-if [ "$#" -eq 2 ]; then
-    print_domain_subdomain "$1" "$2"
-
-# If only domain is provided, display information for specific subdomains
-elif [ "$#" -eq 1 ]; then
-    domain=$1
-    subdomains=("www" "lb-01" "web-01" "web-02")
-
-    # Loop through the subdomains and display information
-    for subdomain in "${subdomains[@]}"; do
-        print_domain_subdomain $domain $subdomain
-    done
-
-# Display usage instructions if incorrect number of arguments are provided
-else
-    echo "Usage: $0 <domain> [subdomain]"
-    exit 1
+if [ "$#" == 1 ]
+then
+  domain_information "$1" "www"
+  domain_information "$1" "lb-01"
+  domain_information "$1" "web-01"
+  domain_information "$1" "web-02"
+elif [ "$#" == 2 ]
+then
+  domain_information "$1" "$2"
 fi
