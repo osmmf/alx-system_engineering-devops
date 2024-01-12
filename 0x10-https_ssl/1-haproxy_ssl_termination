@@ -37,11 +37,18 @@ defaults
 
 frontend  besthor_frontend
         bind *:443 ssl crt /etc/letsencrypt/live/www.futureevolution.tech/www.futureevolution.tech.pem
-        http-request redirect scheme https unless { ssl_fc }
         http-request set-header X-Forwarded-Proto https
+	http-request redirect scheme https unless { ssl_fc }
         mode http
         default_backend besthor_backend
+	acl is_holberton hdr_end(host) -i www.futureevolution.com
+    	use_backend holberton_backend if is_holberton
+        
 backend besthor_backend
         balance roundrobin
         server 176572-web-01 54.165.168.252:80 check
         server 176572-web-02 34.237.91.136:80 check
+
+backend holberton_backend
+    mode http
+    server web-server 127.0.0.1:80
