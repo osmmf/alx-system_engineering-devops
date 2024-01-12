@@ -21,13 +21,18 @@ frontend www-http
     bind *:80
     reqadd X-Forwarded-Proto:\ http
     acl is_futureevolution hdr_end(host) -i www.futureevolution.tech
-    redirect scheme https code 301 if !{ ssl_fc } is_futureevolution
+    http-request redirect scheme https code 301 if !{ ssl_fc } is_futureevolution
 
 frontend www-https
-    bind *:443 ssl crt /etc/letsencrypt/live/www.futureevolution.tech/fullchain.pem
+    bind *:443 ssl crt /etc/letsencrypt/live/www.futureevolution.tech/www.futureevolution.tech.pem
     reqadd X-Forwarded-Proto:\ https
     acl is_futureevolution hdr_end(host) -i www.futureevolution.tech
     use_backend futureevolution_backend if is_futureevolution
+
+backend futureevolution_backend
+    mode http
+    server web-server 127.0.0.1:80
+
 
 backend futureevolution_backend
     mode http
