@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
-# This script creates a symbolic link from the default Nginx configuration file in sites-available
-# to the sites-enabled directory, using the 'ln' command with the '-sf' option.
-# The '-f' flag is added to forcefully remove the file if it already exists.
-
-# Create a symbolic link for Nginx configuration
+# This acheives same as task 0 but service (init) must say that nginx is not running 
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-
-# Restart Nginx to apply the changes
 sudo service nginx restart
-
-# Remove the Nginx PID file to ensure a clean restart
-rm /run/nginx.pid
+kill "$(pgrep 'nginx' | head -1)"
