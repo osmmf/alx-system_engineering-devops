@@ -1,25 +1,13 @@
-# /etc/haproxy/haproxy.cfg
-
-# Global settings
 global
     log /dev/log local0
     log /dev/log local1 notice
     chroot /var/lib/haproxy
-    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
     stats timeout 30s
     user haproxy
     group haproxy
     daemon
 
-# Default SSL material locations
-ca-base /etc/ssl/certs
-crt-base /etc/ssl/private
-
-# Default ciphers to use on SSL-enabled listening sockets.
-# For more information, see ciphers(1SSL).
-ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
-
-# Default options
 defaults
     log global
     mode http
@@ -29,30 +17,23 @@ defaults
     timeout client 50000
     timeout server 50000
 
-# Frontend configuration for HTTP and HTTPS
-frontend http_front
+frontend www-http
     bind *:80
-    mode http
-    option forwardfor
-    option http-server-close
     reqadd X-Forwarded-Proto:\ http
+    acl is_futureevolution hdr_end(host) -i www.futureevolution.tech
+    http-request redirect scheme https code 301 if !{ ssl_fc } is_futureevolution
 
-    # Redirect HTTP traffic to HTTPS
-    acl is_http hdr_beg(host) -i www
-    redirect scheme https code 301 if is_http
-
-frontend https_front
-    bind *:443 ssl crt /etc/letsencrypt/live/lb01.futureevolution.tech/fullchain.pem
-    mode http
-    option forwardfor
-    option http-server-close
+frontend www-https
+    bind *:443 ssl crt /etc/letsencrypt/live/www.futureevolution.tech/www.futureevolution.tech.pem
     reqadd X-Forwarded-Proto:\ https
+    acl is_futureevolution hdr_end(host) -i www.futureevolution.tech
+    use_backend futureevolution_backend if is_futureevolution
 
-    # Your existing HTTPS configurations go here
-    # ...
-
-# Backend configuration (add your backend server details)
-backend your_backend
+backend futureevolution_backend
     mode http
-    balance roundrobin
-    server webserver1 192.168.1.1:80 check
+    server web-server 127.0.0.1:80
+
+
+backend futureevolution_backend
+    mode http
+    server web-server 127.0.0.1:80
